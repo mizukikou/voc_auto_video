@@ -1,30 +1,63 @@
-我正在進行「VOC_Sentry 旅宿顧客評論分析與安全查詢平台」的專題發表準備與自動化簡報影片製作，以下是目前累積的所有核心背景、系統架構與自動化影片腳本進度，請接續協助我：
+# VOC_Sentry 20 分鐘發表影片自動化生成專案 — 專案狀態與交接摘要
 
-### 一、 專案背景與核心規格（VOC_Sentry）
-1. **商業背景與實證資料**：台灣旅宿業約 65%–80% 高度依賴 OTA 平台導流。本專案以「東門3號青年旅館」Booking.com 的 **1,476 筆**真實評論為實證，解決人工讀不完、跨月趨勢難察覺、以及評論夾帶旅客姓名（PII）與隱私個資的痛點。
-2. **團隊治理與 52 份交付資產**：六週 MVP，採四人職責分離（A 資料ETL、B 前端UI、C 架構整合、D 測試QA）與單向規格追溯鏈。已完成 `Requirements.md (v1.2)`、`architecture.md (v1.1)`、`data_dictionary.md (v1.2)`、`api_contract.md (v1.1 + Issue #43)`、`testing_plan.md (v1.2)`、網站操作手冊與新手教學等 52 份資產，並如實區分完成（✅）、部分完成（🟡 Issue #43 手動瀏覽器清單待補）與未完成（⬜ Linux HTTPS 正式部署）。
-3. **技術架構（Hybrid View）**：Python 3.14 + Django 5.2 + DRF 3.16 + MySQL 8.0 + Waitress（本機 127.0.0.1:8000，DEBUG=False）。遵循 KISS 原則（不引入 React/Vue/Redis/Celery/Docker）；一般頁面採 Django Templates SSR，儀表板動態圖表（Chart.js）與分頁採 DRF JSON API；Pandas/Matplotlib 僅限離線 EDA。
-4. **資料層與等冪 ETL**：
-   - 三大核心表：`VOCReview`、`ImageAsset`、`VOCRestrictedAuditLog`。
-   - 技術主鍵 `BigAutoField`；業務去重採複合唯一鍵 `(reviewer_name, review_date, title)` 並設為欄位級 `utf8mb4_0900_bin` 精準比對；評分採 `Decimal(3,1)`；缺失標題正規化為「未提供標題」。
-   - `import_voc` 唯讀串流讀取 UTF-8 BOM CSV（SHA-256 前後不變），同鍵同內容跳過、同鍵異內容拒覆寫確保等冪，結構錯誤或錯誤列達 10% 觸發熔斷整批拒收。
-5. **儀表板與資安防護（零信任與 Fail-Closed）**：
-   - 台北日期（UTC+8）轉 UTC 半開區間查詢；KPI 總數（1,476）= 37 個月趨勢加總 = 9 個評分分布加總（2023-10 單月皆為 41 筆）。
-   - RBAC 群組控權（`VOC_Analyst`、`Quality_Auditor`、`Compliance_Officer`），即使是 Superuser 未獲明確授權亦不放行。
-   - Issue #43 短效拋棄式權杖：CSPRNG 產生，SHA-256 摘要存於單程序 `LocMemCache`，效期 5 分鐘、綁定 Session、單次原子核銷、限 CSRF 保護之 POST Body 傳遞；禁止前端傳 `reason_code`（後端依群組自動推導）；必須先成功寫入 `VOCRestrictedAuditLog` 才顯示受限內文（Fail-Closed，保留 90 天，不存原文）。
-   - 影像防護（`ImageProtectionService`）：限 JPEG/PNG、<=5MB、<=2000萬像素，校驗二進位檔頭；原圖 UUID 存私有目錄（需 `view_original_image`）；展示圖去 EXIF、縮放 1600px 並加浮水印。
-6. **測試與驗證架構（隔離測試庫，零污染正式庫 `voc_sentry_local`）**：
-   - 獨立量化測試紀錄（彼此獨立不相加）：**103 項**（本機交付回歸與 Migration 漂移檢查）、**75 項**（Issue #40 合成 CSV 端到端整合）、**114 項**（Issue #43 權限與權杖自動化測試）、**29 案**需求追溯矩陣。
-   - `scripts/` 離線驗證腳本：`step2_inventory.py`（唯讀盤點）、`step2_independent_validation.py`（獨立重算原始 CSV 防盲點）、`issue38_dashboard_validation.py`（針對真實 1,476 筆唯讀對帳）。
+## 1. 專案目標與工作目錄
+- **工作目錄**：`c:\voc_auto_video`
+- **輸出目錄**：`c:\voc_auto_video\output_visual_20min\`
+  - 分段短語音快取：`audio\part_XX_sYY.mp3`
+  - 分段影片快取：`clips\clip_01.mp4` ~ `clip_16.mp4`
+  - 主合成影片與字幕：`VOC_Sentry_20min_Visual_Master.mp4` / `.ass`
+  - 最終硬燒字幕成品：`VOC_Sentry_20min_Final_HardSub.mp4`
+- **影片總架構（共 16 幕，約 20 分鐘，1920x1080 @ 12fps）**：
+  - **PART 1（Slide 01 ~ 08）**：系統架構與完整交付成果（左欄重點卡片 + 右欄動態圖表）。
+  - **PART 2（Demo 09 ~ 11）**：GitHub 團隊協作流程（建立 Issue #43 → Feature 分支與 114 項隔離測試 → PR 品質閘門與合併）。
+  - **PART 3（Demo 12 ~ 16）**：Windows 本機建置（Waitress）與網站實戰操作（Dashboard 下鑽 → RBAC 登入 → VOC 白名單與評分底線連結 → 拋棄式 Token 核銷與 Fail-Closed 審計）。
 
 ---
 
-### 二、 自動化 20 分鐘發表影片製作進度（位於 `C:\voc_auto_video\`）
-目前已完成模組化 Python 影片生成引擎（使用 `edge-tts` 台灣繁體女聲 `zh-TW-HsiaoChenNeural`、`Pillow` 動態繪圖、`MoviePy` 剪輯與 `imageio_ffmpeg` 硬燒字幕）：
-1. `1_visual_engine.py`：賽博科技感雙欄簡報引擎（含動態科技網格、旋轉光環、流光掃描線、能量流動線、標準 `1 : N` ER 實體關聯圖、動態伸長長條圖與 103/75/114 數據卡片）。
-2. `2_demo_renderer.py`：模擬鼠標與雙層霓虹點擊特效引擎，演示 GitHub 開立 Issue #43 → Feature 分支開發與隔離測試 → PR #44 審查合併，以及 PowerShell 執行 `local_server.py`（`--setup`、`--check`、`--port 8000`）與網站完整操作流程。
-3. `3_presentation_data.py`：16 幕完整全白話自然口語講稿（總長約 20 分鐘）。
-4. `4_run_build.py`：主渲染引擎（語速 `RATE = "-5%"`），產出 `output_visual_20min/VOC_Sentry_20min_Visual_Master.mp4` 與亮黃色單行自然語意字幕 `.ass`。
-5. `5_burn_hard_subtitles.py`：呼叫 FFmpeg 將 `.ass` 字幕永久硬燒進 `.mp4`，產出單檔可直接跨電腦播放的 `VOC_Sentry_20min_Final_HardSub.mp4`。
+## 2. 核心程式檔案職責與設計規格
+1. **`1_visual_engine.py`（PART 1 投影片視覺渲染引擎）**
+   - 支援左右雙欄各自依語音關鍵句比例（`trigger_ratios`、`right_ratios`）動態浮現。
+   - **Slide 01**：右側三條長條圖百分比數字（`65% - 80%`、`63.4%`、`20% 以下`）隨長條伸長動畫（`bar_anim`）同步跳動。
+   - **Slide 03**：架構圖頂部常駐 `運行環境：Python 3.14 | Django 5.2 | DRF 3.16 | MySQL 8.0`，包含 `Waitress WSGI (127.0.0.1:8000 | DEBUG=False)` 與底部 `[邊界隔離] 離線 EDA：Pandas / Matplotlib`。
+   - **Slide 04**：MySQL ER Diagram 依語音順序顯示 `VOCReview` → `ImageAsset` → `VOCRestrictedAuditLog` → `auth_user (RBAC 帳號)`，並畫出三條 `1 : N` 外鍵連線（`target_id`、`actor_id`、`uploaded_by`），說明 `VOCReview` 與 `auth_user` 透過審計表橋接。
+   - 底部配置雙層「**螢光紅 `(255, 45, 85)`**」與「**螢光綠 `(57, 255, 20)`**」霓虹流光條（位於字幕區下緣，避免遮擋字幕）。
+2. **`2_demo_renderer.py`（PART 2 & PART 3 操作演示渲染引擎）**
+   - 支援 `d_ratios` 依語音句首逐組顯示終端機指令與審查項目，絕不提早劇透。
+   - 中文註解與狀態列使用微軟正黑體 `F_SMALL`，純英文指令使用等寬字型 `F_MONO`（無方框亂碼）。
+   - **Demo 10 (`git_branch`)**：`Ran 114 tests in 4.82s - OK` 具備發光螢光綠燈圓點與綠色高亮外框。
+   - **Demo 15 (`voc`)**：無 `[檢視受限內文]` 按鈕，直接以**評分 `8.0` 出現藍色連結底線**代表具備受限資料核銷雙重權限。
+3. **`3_presentation_data.py`（16 幕完整講稿、觸發關鍵句與鼠標路徑資料）**
+   - **Slide 01**：五項主軸完整收錄（`資料正確 → 可驗證 → 可操作 → 安全可控 → 自動化驗證`）。
+   - **Slide 04**：講稿已補充 `VOCReview` 與 `auth_user` 透過審計紀錄表橋接的三條 `1 : N` 外鍵說明。
+   - **Demo 10**：講稿已切分為 5 個獨立句子，確保最後一組 `git add` & `git push` 在念到「確認沒有破壞任何現有功能後」才顯示。
+   - **Demo 15**：鼠標精準移動並點擊第一筆資料帶有底線的 `8.0` 分連結 `(505, 345)`。
+4. **`4_run_build.py`（逐句精準語音合成與 0 誤差音畫同步主程式）**
+   - 使用 `zh-TW-HsiaoChenNeural`（語速 `-12%`），將每幕講稿按句號切分為短句獨立合成 `.mp3`，依真實音檔秒數累加時間軸，並於每幕結尾補上 `2.0` 秒真實靜音幀（`AudioArrayClip`），確保全片 20 分鐘音畫與字幕零誤差同步。
+   - 支援斷點續傳快取機制（已存在的 `part_XX_sYY.mp3` 與 `clip_XX.mp4` 會自動跳過）。
+5. **`5_burn_hard_subtitles.py`（FFmpeg ASS 亮黃色黑底硬字幕燒錄腳本）**
 
-請確認收到以上彙整資料，並隨時準備協助我進行簡報演練 Q&A、文件調整或影片微調！
+---
+
+## 3. 常用局部重算與全片重建指令（PowerShell）
+
+### 情境 A：僅修改某一幕的「畫面排版/動畫」（未改語音講稿）
+```powershell
+# 範例：僅重算第 10 幕畫面並重新燒錄字幕
+Remove-Item -Path "c:\voc_auto_video\output_visual_20min\clips\clip_10.mp4" -Force -ErrorAction SilentlyContinue
+python -u "c:\voc_auto_video\4_run_build.py"
+python -u "c:\voc_auto_video\5_burn_hard_subtitles.py"
+```
+
+### 情境 B：修改某一幕的「語音講稿文字」（需同步重算該幕語音與畫面）
+```powershell
+# 範例：重算第 10 幕語音與畫面
+Remove-Item -Path "c:\voc_auto_video\output_visual_20min\audio\part_10*.*","c:\voc_auto_video\output_visual_20min\clips\clip_10.mp4" -Force -ErrorAction SilentlyContinue
+python -u "c:\voc_auto_video\4_run_build.py"
+python -u "c:\voc_auto_video\5_burn_hard_subtitles.py"
+```
+
+---
+
+## 4. 給 AI 助手的協作規範（開啟新對話時請遵守）
+- 提供完整 Python 程式碼修改時，**務必拆分成 4 個短小區塊分段顯示**，避免網頁介面截斷。
+- 避免直接使用 `list[0]` 方括號索引（防止 Markdown 過濾），統一使用 `list.__getitem__(0)` 寫法。
