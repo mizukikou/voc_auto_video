@@ -10,11 +10,11 @@ WIDTH, HEIGHT, F_H1, F_H2, F_BODY, F_SMALL, F_MONO = (
 
 def draw_cursor_and_click(draw, x, y, is_clicking=False):
     if is_clicking:
-        draw.ellipse((x - 48, y - 48, x + 48, y + 48), outline=(244, 63, 94), width=3)
-        draw.ellipse((x - 28, y - 28, x + 28, y + 28), outline=(251, 113, 133), width=4)
-        draw.ellipse((x - 12, y - 12, x + 12, y + 12), fill=(244, 63, 94))
+        draw.ellipse((x - 48, y - 48, x + 48, y + 48), outline=(255, 45, 85), width=3)
+        draw.ellipse((x - 28, y - 28, x + 28, y + 28), outline=(255, 90, 120), width=4)
+        draw.ellipse((x - 12, y - 12, x + 12, y + 12), fill=(255, 45, 85))
     else:
-        draw.ellipse((x - 16, y - 16, x + 22, y + 22), outline=(56, 189, 248), width=2)
+        draw.ellipse((x - 16, y - 16, x + 22, y + 22), outline=(57, 255, 20), width=2)
     pointer = [(x, y), (x, y + 38), (x + 11, y + 27), (x + 19, y + 44), (x + 25, y + 41), (x + 17, y + 24), (x + 30, y + 24)]
     draw.polygon(pointer, fill=(255, 255, 255), outline=(14, 165, 233))
 
@@ -27,129 +27,179 @@ def render_demo_frame(scene_type, progress, title):
     scan_x2 = int(WIDTH - 240 - (WIDTH - 240) * ((progress * 2.5) % 1.0))
     draw.rectangle((scan_x2, HEIGHT - 10, scan_x2 + 240, HEIGHT - 5), fill=(57, 255, 20))
     tag = "PART 2：GitHub 協作流程" if scene_type.startswith("git_") else "PART 3：網站建置與操作"
-    draw.text((50, 22), f"{tag}  |  {title}", fill=(74, 222, 128), font=F_H2)
-    if scene_type in ["powershell", "git_branch"]:
-        draw.rectangle((120, 140, WIDTH - 120, HEIGHT - 80), fill=(10, 14, 23), outline=(56, 189, 248), width=3)
-        draw.rectangle((120, 140, WIDTH - 120, 195), fill=(25, 36, 56))
-        win_title = "VS Code Terminal - Git Feature Branch Workflow" if scene_type == "git_branch" else "Windows PowerShell - C:\\VOC_Sentry"
-        draw.text((150, 152), win_title, fill=(56, 189, 248), font=F_SMALL)
-        if scene_type == "git_branch":
-            commands = [
-                "PS C:\\VOC_Sentry> git checkout main && git pull origin main",
-                "PS C:\\VOC_Sentry> git checkout -b feature/issue-43-score-filter-token",
-                "Switched to a new branch 'feature/issue-43-score-filter-token'",
-                "# 依循 Copilot 守則：僅實作 Issue #43 範圍，不擅改 Schema",
-                "PS C:\\VOC_Sentry> python manage.py test --settings=config.test_settings",
-                "Ran 114 tests in 4.82s - OK (Isolated Test DB Verified)",
-                "PS C:\\VOC_Sentry> git add . && git commit -m \"feat(#43): add score filter & ephemeral token\"",
-                "PS C:\\VOC_Sentry> git push -u origin feature/issue-43-score-filter-token"
-            ]
-        else:
-            commands = [
-                "PS C:\\VOC_Sentry> python -m venv .venv",
-                "PS C:\\VOC_Sentry> .\\.venv\\Scripts\\python.exe -m pip install -r .\\requirements.txt",
-                "PS C:\\VOC_Sentry> .\\.venv\\Scripts\\python.exe .\\backend\\local_server.py --setup",
-                "[OK] Database 'voc_sentry_local' initialized safely (utf8mb4).",
-                "PS C:\\VOC_Sentry> .\\.venv\\Scripts\\python.exe .\\backend\\local_server.py --check",
-                "System check identified no issues (0 silenced). Migrations verified.",
-                "PS C:\\VOC_Sentry> .\\.venv\\Scripts\\python.exe .\\backend\\local_server.py --port 8000",
-                "[INFO] Serving VOC_Sentry on http://127.0.0.1:8000 (DEBUG=False)"
-            ]
-        visible_lines = max(1, int(progress * (len(commands) + 1)))
-        y = 230
-        for idx, line in enumerate(commands[:visible_lines]):
-            color = (74, 222, 128) if any(k in line for k in ["[OK]", "[INFO]", "OK", "Switched"]) else ((148, 163, 184) if line.startswith("#") else (248, 250, 252))
-            cursor_blink = " _" if (idx == visible_lines - 1 and int(progress * 20) % 2 == 0) else ""
-            draw.text((160, y), line + cursor_blink, fill=color, font=F_SMALL if line.startswith("#") else F_MONO)
-            y += 65
-        return img
-    draw.rectangle((100, 130, WIDTH - 100, HEIGHT - 70), fill=(248, 250, 252), outline=(56, 189, 248), width=3)
-    draw.rectangle((100, 130, WIDTH - 100, 200), fill=(226, 232, 240))
-    urls = {
-        "git_issue": "https://github.com",
-        "git_pr": "https://github.com",
-        "dashboard": "http://127.0.0",
-        "login": "http://127.0.0",
-        "voc": "http://127.0.0",
-        "token": "http://127.0.0  (POST Body + CSRF)"
-    }
-    draw.rectangle((280, 145, WIDTH - 200, 185), fill=(255, 255, 255), outline=(203, 213, 225), width=2)
-    draw.text((300, 152), urls[scene_type], fill=(51, 65, 85), font=F_SMALL)
+    draw.text((50, 22), f"{tag}  |  {title}", fill=(57, 255, 20), font=F_H2)
 
     if scene_type == "git_issue":
-        draw.rectangle((100, 200, WIDTH - 100, 270), fill=(36, 41, 47))
-        draw.text((140, 218), "GitHub  |  mizukikou / VOC_Sentry   <> Code   (!) Issues   (Y) Pull requests", fill=(248, 250, 252), font=F_BODY)
-        draw.rectangle((160, 300, WIDTH - 160, 860), fill=(255, 255, 255), outline=(203, 213, 225), width=2)
-        draw.text((200, 325), "建立新 Issue：Issue #43 — 新增精確評分篩選與短效拋棄式權杖", fill=(15, 23, 42), font=F_H2)
-        spec_lines = [
-            "- 規格追溯：對齊 docs/api_contract.md v1.1 第 10.2 & 10.3 節",
-            "- 開發範圍：GET /api/v1/voc/ 允許一位小數 score；POST /voc/restricted/ 核銷權杖",
-            "- 安全邊界：權杖存於 LocMemCache (5分鐘有效)、禁止前端傳入 reason_code",
-            "- 驗收條件 (DoD)：通過權限越界、重放攻擊與 Fail-Closed 審計自動化測試"
+        draw.rectangle((140, 130, WIDTH - 140, 910), fill=(13, 17, 23), outline=(48, 54, 61), width=2)
+        draw.text((180, 165), "GitHub / VOC_Sentry / Issues / New Issue (#43)", fill=(139, 148, 158), font=F_SMALL)
+        draw.rectangle((180, 220, WIDTH - 180, 290), fill=(22, 27, 34), outline=(56, 189, 248), width=2)
+        draw.text((200, 238), "feat(#43): 新增精確評分篩選與短效拋棄式權杖", fill=(240, 246, 252), font=F_BODY)
+        draw.rectangle((180, 315, WIDTH - 180, 740), fill=(22, 27, 34), outline=(48, 54, 61), width=2)
+        lines = [
+            "### 1. 規格追溯 (Spec Traceability)",
+            "- 依據 docs/api_contract.md v1.1 第 10.2 & 10.3 節實作",
+            "### 2. 開發邊界 (Scope & Non-Goals)",
+            "- 僅修改 /api/v1/voc/ 評分篩選與 /restricted/ 核銷端點",
+            "### 3. 安全紅線 (Security Invariants)",
+            "- Token 存於 LocMemCache，TTL=300秒，單次核銷即原子銷毀",
+            "- 禁止前端傳入 reason_code (傳入回 400)，後端依群組自動推導",
+            "### 4. 完成定義 (Definition of Done)",
+            "- 通過越界存取、重放攻擊、過期失效與 Fail-Closed 審計測試"
         ]
-        sy = 410
-        for sl in spec_lines:
-            draw.text((200, sy), sl, fill=(51, 65, 85), font=F_BODY)
-            sy += 65
-        draw.rectangle((WIDTH - 480, 750, WIDTH - 200, 815), fill=(22, 163, 74) if progress > 0.65 else (34, 197, 94))
-        draw.text((WIDTH - 445, 765), "Submit new issue", fill=(255, 255, 255), font=F_BODY)
-        return img
+        ly = 340
+        for line in lines[:max(1, int((progress / 0.7) * len(lines)) + 1)]:
+            col = (56, 189, 248) if line.startswith("###") else (201, 209, 217)
+            draw.text((205, ly), line, fill=col, font=F_SMALL)
+            ly += 42
+        btn_col = (46, 160, 67) if progress > 0.75 else (35, 134, 54)
+        draw.rectangle((WIDTH - 450, 765, WIDTH - 180, 830), fill=btn_col)
+        draw.text((WIDTH - 415, 782), "Submit new issue", fill=(255, 255, 255), font=F_BODY)
+    elif scene_type == "git_branch":
+        draw.rectangle((120, 130, WIDTH - 120, 910), fill=(12, 16, 26), outline=(56, 189, 248), width=2)
+        draw.rectangle((120, 130, WIDTH - 120, 185), fill=(30, 41, 59))
+        draw.text((150, 145), "VS Code Terminal - Git Feature Branch Workflow", fill=(148, 163, 184), font=F_SMALL)
+        cmds = [
+            "PS C:\\VOC_Sentry> git checkout main && git pull origin main",
+            "PS C:\\VOC_Sentry> git checkout -b feature/issue-43-score-filter-token",
+            "Switched to a new branch 'feature/issue-43-score-filter-token'",
+            "# 依循 Copilot 守則：僅實作 Issue #43 範圍，不擅改 Schema",
+            "PS C:\\VOC_Sentry> python manage.py test --settings=config.test_settings",
+            "Ran 114 tests in 4.82s - OK (Isolated Test DB Verified)",
+            "PS C:\\VOC_Sentry> git add . && git commit -m \"feat(#43): add score filter & ephemeral token\"",
+            "PS C:\\VOC_Sentry> git push -u origin feature/issue-43-score-filter-token"
+        ]
+        ty = 220
+        for line in cmds[:max(1, int((progress / 0.85) * len(cmds)) + 1)]:
+            if "OK" in line:
+                col = (57, 255, 20)
+                draw.rectangle((145, ty - 8, WIDTH - 145, ty + 38), fill=(15, 55, 38), outline=(57, 255, 20), width=2)
+                draw.ellipse((160, ty + 3, 184, ty + 27), fill=(57, 255, 20), outline=(255, 255, 255), width=2)
+                draw.text((198, ty), line, fill=col, font=F_MONO)
+                ty += 56
+                continue
+            elif line.startswith("#"):
+                draw.text((155, ty), line, fill=(148, 163, 184), font=F_SMALL)
+                ty += 50
+                continue
+            elif "Switched" in line:
+                col = (74, 222, 128)
+            else:
+                col = (226, 232, 240)
+            draw.text((155, ty), line, fill=col, font=F_MONO)
+            ty += 50
+
     elif scene_type == "git_pr":
-        draw.rectangle((100, 200, WIDTH - 100, 270), fill=(36, 41, 47))
-        draw.text((140, 218), "GitHub  |  Pull Request #44 : feature/issue-43  ->  main", fill=(248, 250, 252), font=F_BODY)
-        draw.rectangle((160, 300, WIDTH - 160, 860), fill=(255, 255, 255), outline=(203, 213, 225), width=2)
-        draw.text((200, 325), "PR #44 審查與品質閘門檢查 (Quality Gate & Code Review)", fill=(15, 23, 42), font=F_H2)
+        draw.rectangle((140, 130, WIDTH - 140, 910), fill=(13, 17, 23), outline=(48, 54, 61), width=2)
+        draw.text((180, 165), "Pull Request #44: feature/issue-43 -> main", fill=(240, 246, 252), font=F_H2)
+        draw.rectangle((180, 225, 330, 270), fill=(35, 134, 54) if progress < 0.75 else (137, 87, 229))
+        draw.text((215, 234), "Open" if progress < 0.75 else "Merged", fill=(255, 255, 255), font=F_BODY)
         checks = [
-            "[PASS] Preflight 安全預檢：無 Hardcoded Secret 與 .env 外洩",
-            "[PASS] Migration Check：makemigrations --check 無未預期結構變更",
-            "[PASS] Automated Regression：114 項整合測試全數通過 (隔離測試庫)",
-            "[APPROVED] Team C & Team D 人工審查通過，符合 Issue #43 規格範圍"
+            "[PASS] Preflight Check：敏感金鑰與 .env 隔離檢查通過",
+            "[PASS] Migration Check：makemigrations --check --dry-run 零漂移",
+            "[PASS] Automated Test Suite：114 項單元與整合測試全數通過",
+            "[APPROVED] Code Review：成員 C 與成員 D 雙重審查通過"
         ]
-        cy = 410
-        for ck in checks:
-            draw.text((200, cy), ck, fill=(22, 163, 74), font=F_BODY)
-            cy += 65
-        draw.rectangle((200, 740, 520, 810), fill=(126, 34, 206) if progress > 0.7 else (34, 197, 94))
-        draw.text((245, 757), "Merged into main" if progress > 0.75 else "Confirm merge", fill=(255, 255, 255), font=F_BODY)
-        return img
+        cy = 310
+        for chk in checks[:max(1, int((progress / 0.65) * len(checks)) + 1)]:
+            draw.rectangle((180, cy, WIDTH - 180, cy + 75), fill=(22, 27, 34), outline=(46, 160, 67), width=2)
+            draw.ellipse((202, cy + 25, 226, cy + 49), fill=(57, 255, 20), outline=(255, 255, 255), width=2)
+            draw.text((240, cy + 22), chk, fill=(57, 255, 20), font=F_BODY)
+            cy += 95
+        if progress > 0.6:
+            draw.rectangle((180, 740, 540, 810), fill=(46, 160, 67))
+            draw.text((235, 758), "Confirm merge", fill=(255, 255, 255), font=F_BODY)
+    elif scene_type == "powershell":
+        draw.rectangle((120, 130, WIDTH - 120, 910), fill=(1, 36, 86), outline=(56, 189, 248), width=3)
+        draw.rectangle((120, 130, WIDTH - 120, 185), fill=(15, 23, 42))
+        draw.text((150, 145), "Windows PowerShell - VOC_Sentry Local Server Setup", fill=(248, 250, 252), font=F_SMALL)
+        cmds = [
+            "PS C:\\VOC_Sentry> python -m venv .venv && .\\.venv\\Scripts\\Activate.ps1",
+            "PS C:\\VOC_Sentry> pip install -r requirements.txt",
+            "PS C:\\VOC_Sentry> python local_server.py setup",
+            "[OK] 建立全新 MySQL 資料庫、套用 Migrations 與初始化 RBAC 群組 (防呆保護已啟用)",
+            "PS C:\\VOC_Sentry> python local_server.py check",
+            "System check identified no issues (0 silenced).",
+            "PS C:\\VOC_Sentry> python local_server.py runserver --port 8000",
+            "[RUNNING] Waitress WSGI 伺服器已於 http://127.0.0.1:8000 安全啟動 (DEBUG=False)"
+        ]
+        ty = 220
+        for line in cmds[:max(1, int((progress / 0.85) * len(cmds)) + 1)]:
+            if "[OK]" in line or "[RUNNING]" in line or "0 silenced" in line:
+                col = (57, 255, 20)
+                draw.ellipse((145, ty + 4, 167, ty + 26), fill=(57, 255, 20))
+                line_font = F_SMALL if ("[OK]" in line or "[RUNNING]" in line) else F_MONO
+                draw.text((180, ty), line, fill=col, font=line_font)
+            else:
+                draw.text((155, ty), line, fill=(255, 255, 255), font=F_MONO)
+            ty += 52
 
-    draw.rectangle((100, 200, WIDTH - 100, 270), fill=(15, 23, 42))
-    draw.text((140, 218), "VOC_Sentry  |   Dashboard    VOC清單    圖片安全    Admin", fill=(248, 250, 252), font=F_BODY)
-    if scene_type == "dashboard":
-        draw.rectangle((150, 310, 650, 480), fill=(255, 255, 255), outline=(203, 213, 225), width=2)
-        draw.text((180, 335), "通過資料驗證筆數 (KPI)", fill=(100, 116, 139), font=F_SMALL)
-        draw.text((180, 385), "1,476 筆", fill=(14, 165, 233), font=F_H1)
-        draw.rectangle((700, 310, WIDTH - 150, 880), fill=(255, 255, 255), outline=(203, 213, 225), width=2)
-        draw.text((740, 335), "評分分布長條圖 (點擊 8.0 分長條下鑽查詢)", fill=(30, 41, 59), font=F_BODY)
-        bx = 780
-        for sc, h in [("6.0", 120), ("7.0", 210), ("8.0", 380), ("9.0", 420), ("10.0", 340)]:
-            draw.rectangle((bx, 800 - h, bx + 110, 800), fill=(239, 68, 68) if (sc == "8.0" and progress > 0.5) else (56, 189, 248))
-            draw.text((bx + 30, 815), sc, fill=(30, 41, 59), font=F_SMALL)
-            bx += 180
+    elif scene_type == "dashboard":
+        draw.rectangle((100, 120, WIDTH - 100, 920), fill=(248, 250, 252), outline=(148, 163, 184), width=2)
+        draw.rectangle((100, 120, WIDTH - 100, 185), fill=(30, 41, 59))
+        draw.text((140, 138), "http://127.0.0  -  VOC_Sentry 旅宿顧客評論分析儀表板 (訪客公開視圖)", fill=(248, 250, 252), font=F_SMALL)
+        draw.rectangle((150, 225, 580, 410), fill=(255, 255, 255), outline=(203, 213, 225), width=2)
+        draw.text((180, 250), "通過驗證評論總數 (Verified)", fill=(100, 116, 139), font=F_SMALL)
+        draw.text((180, 305), "1,476 筆", fill=(14, 165, 233), font=F_H1)
+        draw.rectangle((150, 440, 580, 625), fill=(255, 255, 255), outline=(203, 213, 225), width=2)
+        draw.text((180, 465), "整體平均評分 (Mean Score)", fill=(100, 116, 139), font=F_SMALL)
+        draw.text((180, 520), "8.6 分", fill=(16, 185, 129), font=F_H1)
+        draw.rectangle((620, 225, WIDTH - 150, 860), fill=(255, 255, 255), outline=(203, 213, 225), width=2)
+        draw.text((660, 255), "各分數區間分布圖 (點擊 8.0 分長條執行下鑽查詢)", fill=(30, 41, 59), font=F_BODY)
+        scores = [("10.0", 290), ("9.0", 380), ("8.0", 420), ("7.0", 210), ("6.0", 120)]
+        bx = 700
+        for sc, h in scores:
+            col = (245, 158, 11) if sc == "8.0" else (59, 130, 246)
+            draw.rectangle((bx, 780 - h, bx + 95, 780), fill=col)
+            draw.text((bx + 20, 795), sc, fill=(51, 65, 85), font=F_SMALL)
+            bx += 140
     elif scene_type == "login":
-        draw.rectangle((660, 330, 1260, 770), fill=(255, 255, 255), outline=(203, 213, 225), width=2)
-        draw.text((710, 365), "系統帳號登入 (無公開註冊)", fill=(15, 23, 42), font=F_H2)
-        draw.rectangle((710, 450, 1210, 510), outline=(148, 163, 184), width=2)
-        draw.text((730, 465), "analyst_user (群組: VOC_Analyst)", fill=(51, 65, 85), font=F_BODY)
-        draw.rectangle((710, 540, 1210, 600), outline=(148, 163, 184), width=2)
-        draw.text((730, 555), "••••••••••••••••", fill=(51, 65, 85), font=F_BODY)
-        draw.rectangle((710, 645, 1210, 710), fill=(2, 132, 199) if progress > 0.6 else (14, 165, 233))
-        draw.text((905, 658), "安全登入", fill=(255, 255, 255), font=F_BODY)
-    elif scene_type == "voc":
-        draw.text((150, 300), "VOC 授權查詢清單 (篩選: score = 8.0 | 隱藏 PK 與 review_id)", fill=(15, 23, 42), font=F_BODY)
-        draw.rectangle((150, 360, WIDTH - 150, 420), fill=(226, 232, 240))
-        draw.text((180, 375), "評論日期 (UTC)          分數     國家       房型              操作", fill=(30, 41, 59), font=F_BODY)
-        ry = 445
-        for r in ["2026-10-15T08:20:00Z     8.0      Taiwan     混合宿舍床位      [檢視受限內文]", "2026-10-12T14:05:00Z     8.0      Japan      女性專屬六人房    [檢視受限內文]", "2026-10-09T11:40:00Z     8.0      Korea      雙人標準房        [檢視受限內文]"]:
-            draw.rectangle((150, ry - 10, WIDTH - 150, ry + 55), fill=(255, 255, 255), outline=(226, 232, 240), width=2)
-            draw.text((180, ry + 5), r, fill=(51, 65, 85), font=F_BODY)
-            ry += 85
-    elif scene_type == "token":
-        draw.rectangle((360, 310, WIDTH - 360, 880), fill=(255, 255, 255), outline=(239, 68, 68), width=3)
-        draw.text((410, 345), "受限欄位安全檢視 (一次性拋棄式權杖驗證通過)", fill=(185, 28, 28), font=F_H2)
-        iy = 430
-        for line in ["- 權杖驗證：CSPRNG Token 核銷成功 (LocMemCache 單次原子消耗)", "- 隱式原因碼：後端依群組自動推導為 SUPPORT_CASE (禁止前端傳入)", "- 強制審計：已寫入 VOCRestrictedAuditLog [ALLOW] (保留90天)", "------------------------------------------------------------------", "- 評論者 (PII)：王*明 (已通過雙權限授權顯示)", "- 評論原文：地點離捷運東門站非常近，公共空間乾淨且服務人員親切！"]:
-            draw.text((410, iy), line, fill=(30, 41, 59), font=F_BODY)
-            iy += 65
-    return img
+        draw.rectangle((100, 120, WIDTH - 100, 920), fill=(241, 245, 249))
+        draw.rectangle((620, 240, 1300, 780), fill=(255, 255, 255), outline=(203, 213, 225), width=2)
+        draw.text((680, 290), "VOC_Sentry 系統安全登入 (無公開註冊)", fill=(15, 23, 42), font=F_H2)
+        draw.text((680, 355), "重新導向目標：/voc/?score=8.0 (保留篩選參數)", fill=(14, 165, 233), font=F_SMALL)
+        draw.rectangle((680, 425, 1240, 495), fill=(248, 250, 252), outline=(148, 163, 184), width=2)
+        draw.text((705, 445), "analyst_tw_01 (RBAC 群組：VOC_Analyst)" if progress > 0.25 else "請輸入授權帳號...", fill=(30, 41, 59), font=F_BODY)
+        draw.rectangle((680, 525, 1240, 595), fill=(248, 250, 252), outline=(148, 163, 184), width=2)
+        draw.text((705, 545), "••••••••••••••••" if progress > 0.5 else "請輸入密碼...", fill=(30, 41, 59), font=F_BODY)
+        draw.rectangle((680, 635, 1240, 710), fill=(14, 165, 233))
+        draw.text((885, 655), "安全登入", fill=(255, 255, 255), font=F_BODY)
 
+    elif scene_type == "voc":
+        draw.rectangle((100, 120, WIDTH - 100, 920), fill=(248, 250, 252))
+        draw.text((140, 155), "VOC 評論白名單查詢清單 (篩選條件：score = 8.0 | 隱藏內部主鍵與姓名)", fill=(15, 23, 42), font=F_BODY)
+        draw.rectangle((140, 220, WIDTH - 140, 285), fill=(30, 41, 59))
+        draw.text((170, 238), "評論日期          評分      旅客國家          入住房型              旅客類型          受限操作", fill=(255, 255, 255), font=F_SMALL)
+        rows = [
+            "2023-10-18       8.0       台灣 (TW)         混合宿舍單人床位      獨行旅客",
+            "2023-10-15       8.0       日本 (JP)         女性專屬六人房        獨行旅客",
+            "2023-10-11       8.0       韓國 (KR)         標準雙人房            情侶/雙人"
+        ]
+        ry = 310
+        for idx, r in enumerate(rows):
+            draw.rectangle((140, ry, WIDTH - 140, ry + 75), fill=(255, 255, 255), outline=(226, 232, 240), width=1)
+            draw.text((170, ry + 22), r, fill=(51, 65, 85), font=F_SMALL)
+            btn_col = (220, 38, 38) if (idx == 0 and progress > 0.75) else (245, 158, 11)
+            draw.rectangle((WIDTH - 390, ry + 14, WIDTH - 165, ry + 60), fill=btn_col)
+            draw.text((WIDTH - 372, ry + 23), "檢視受限內文", fill=(255, 255, 255), font=F_SMALL)
+            ry += 95
+
+    elif scene_type == "token":
+        draw.rectangle((100, 120, WIDTH - 100, 920), fill=(15, 23, 42), outline=(56, 189, 248), width=2)
+        draw.text((140, 155), "受限內文核銷與強制審計紀錄 (POST + CSRF + 拋棄式 Token)", fill=(56, 189, 248), font=F_H2)
+        draw.rectangle((150, 230, WIDTH - 150, 460), fill=(30, 41, 59), outline=(74, 222, 128), width=2)
+        draw.text((185, 255), "一次性 Token 核銷成功 (已從 LocMemCache 原子銷毀，重放請求將回傳 403)", fill=(74, 222, 128), font=F_SMALL)
+        draw.text((185, 305), "旅客姓名 (PII)：陳*明  |  入住資訊：2 晚 · 2023 年 10 月", fill=(248, 250, 252), font=F_BODY)
+        draw.text((185, 365), "評論完整原文：地點離捷運東門站非常近，公共交誼廳很乾淨，下次來台北還會入住。", fill=(226, 232, 240), font=F_BODY)
+        draw.rectangle((150, 500, WIDTH - 150, 860), fill=(25, 36, 56), outline=(245, 158, 11), width=2)
+        draw.text((185, 525), "強制審計紀錄 (VOCRestrictedAuditLog - Fail-Closed 寫入確認)", fill=(251, 191, 36), font=F_BODY)
+        audits = [
+            "• 調閱人員 (Actor)：analyst_tw_01 (群組自動推導 reason_code = SUPPORT_CASE)",
+            "• 目標評論 (Target)：VOCReview #1042 (單次檢視授權，禁止批次匯出)",
+            "• 稽核狀態 (Outcome)：ALLOW (已寫入不可否認審計日誌，若寫入失敗則阻斷顯示)",
+            "• 影像安全管理同步生效：原圖 UUID 私有隔離 / 公開展示圖已去 EXIF 並加浮水印"
+        ]
+        ay = 585
+        for a in audits[:max(1, int((progress / 0.8) * len(audits)) + 1)]:
+            draw.text((185, ay), a, fill=(226, 232, 240), font=F_SMALL)
+            ay += 55
+    return img
