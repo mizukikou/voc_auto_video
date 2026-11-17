@@ -62,7 +62,8 @@ def render_demo_frame(scene_type, progress, title):
         for idx, line in enumerate(commands[:visible_lines]):
             color = (74, 222, 128) if any(k in line for k in ["[OK]", "[INFO]", "OK", "Switched"]) else ((148, 163, 184) if line.startswith("#") else (248, 250, 252))
             cursor_blink = " _" if (idx == visible_lines - 1 and int(progress * 20) % 2 == 0) else ""
-            draw.text((160, y), line + cursor_blink, fill=color, font=F_MONO)
+            use_font = F_SMALL if line.startswith("#") else F_MONO
+            draw.text((160, y), line + cursor_blink, fill=color, font=use_font)
             y += 65
         return img
     draw.rectangle((100, 130, WIDTH - 100, HEIGHT - 70), fill=(248, 250, 252), outline=(56, 189, 248), width=3)
