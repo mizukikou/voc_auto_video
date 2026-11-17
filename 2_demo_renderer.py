@@ -1,4 +1,4 @@
-import importlib.util
+﻿import importlib.util
 from PIL import Image, ImageDraw
 
 _spec = importlib.util.spec_from_file_location("ve", "1_visual_engine.py")
@@ -23,9 +23,9 @@ def render_demo_frame(scene_type, progress, title):
     draw = ImageDraw.Draw(img)
     draw.rectangle((0, 0, WIDTH, 90), fill=(20, 30, 50))
     scan_x = int((WIDTH - 240) * ((progress * 2.5) % 1.0))
-    draw.rectangle((scan_x, HEIGHT - 18, scan_x + 240, HEIGHT - 13), fill=(74, 222, 128))
+    draw.rectangle((scan_x, HEIGHT - 18, scan_x + 240, HEIGHT - 13), fill=(255, 45, 85))
     scan_x2 = int(WIDTH - 240 - (WIDTH - 240) * ((progress * 2.5) % 1.0))
-    draw.rectangle((scan_x2, HEIGHT - 10, scan_x2 + 240, HEIGHT - 5), fill=(56, 189, 248))
+    draw.rectangle((scan_x2, HEIGHT - 10, scan_x2 + 240, HEIGHT - 5), fill=(57, 255, 20))
     tag = "PART 2：GitHub 協作流程" if scene_type.startswith("git_") else "PART 3：網站建置與操作"
     draw.text((50, 22), f"{tag}  |  {title}", fill=(74, 222, 128), font=F_H2)
     if scene_type in ["powershell", "git_branch"]:
@@ -152,3 +152,4 @@ def render_demo_frame(scene_type, progress, title):
             draw.text((410, iy), line, fill=(30, 41, 59), font=F_BODY)
             iy += 65
     return img
+
