@@ -39,9 +39,12 @@ def draw_cyber_background(draw, progress):
 
     draw.rectangle((45, 45, WIDTH - 45, HEIGHT - 45), outline=(30, 58, 138), width=3)
     draw.rectangle((45, 45, WIDTH - 45, 195), fill=(20, 30, 50))
+
+    # 移至字幕下緣（y = 1062 與 1070）的雙層霓虹流光燈條
     scan_x = int(45 + (WIDTH - 290) * ((progress * 2) % 1.0))
-    draw.rectangle((scan_x, 43, scan_x + 200, 49), fill=(56, 189, 248))
-    draw.rectangle((scan_x, 193, scan_x + 200, 198), fill=(168, 85, 247))
+    draw.rectangle((scan_x, HEIGHT - 18, scan_x + 200, HEIGHT - 13), fill=(56, 189, 248))
+    scan_x2 = int(WIDTH - 245 - (WIDTH - 290) * ((progress * 2) % 1.0))
+    draw.rectangle((scan_x2, HEIGHT - 10, scan_x2 + 200, HEIGHT - 5), fill=(168, 85, 247))
 
 def draw_flowing_arrow(draw, x1, y1, x2, y2, progress, col=(56, 189, 248)):
     draw.line((x1, y1, x2, y2), fill=(51, 65, 85), width=4)
@@ -49,7 +52,6 @@ def draw_flowing_arrow(draw, x1, y1, x2, y2, progress, col=(56, 189, 248)):
     px = int(x1 + (x2 - x1) * t)
     py = int(y1 + (y2 - y1) * t)
     draw.ellipse((px - 7, py - 7, px + 7, py + 7), fill=col)
-
 def draw_right_visual_chart(draw, chart_type, progress=1.0):
     rx1, ry1, rx2, ry2 = 1120, 240, 1845, 915
     draw.rectangle((rx1 - 3, ry1 - 3, rx2 + 3, ry2 + 3), outline=(30, 58, 138), width=2)
@@ -99,7 +101,6 @@ def draw_right_visual_chart(draw, chart_type, progress=1.0):
             draw.text((rx1 + 45, dy + 15), name, fill=(248, 250, 252), font=F_SMALL)
             draw.text((rx1 + 420, dy + 15), desc, fill=(148, 163, 184), font=F_SMALL)
             dy += 70
-
     elif chart_type == "arch_diagram":
         draw.text((rx1 + 35, ry1 + 25), "Hybrid View 動態能量流架構圖", fill=(56, 189, 248), font=F_H2)
         boxes = [
@@ -121,6 +122,7 @@ def draw_right_visual_chart(draw, chart_type, progress=1.0):
         for bx1, by1, bx2, by2, label, col in boxes[:visible_boxes]:
             draw.rectangle((bx1, by1, bx2, by2), fill=col, outline=(226, 232, 240), width=2)
             draw.text((bx1 + 25, by1 + 24), label, fill=(255, 255, 255), font=F_SMALL)
+
     elif chart_type == "er_model":
         draw.text((rx1 + 35, ry1 + 25), "MySQL 核心實體關聯圖 (ER Diagram)", fill=(56, 189, 248), font=F_H2)
         if progress > 0.35:
@@ -157,7 +159,6 @@ def draw_right_visual_chart(draw, chart_type, progress=1.0):
             draw.text((rx1 + 400, ry1 + 433), "ImageAsset (影像資產)", fill=(255, 255, 255), font=F_SMALL)
             for i, txt in enumerate(["PK: uuid (私有原圖隔離)", "FK: uploaded_by_id", "展示圖去 EXIF + 浮水印"]):
                 draw.text((rx1 + 400, ry1 + 478 + i * 42), txt, fill=(226, 232, 240), font=F_SMALL)
-
     elif chart_type == "etl_pipeline":
         draw.text((rx1 + 35, ry1 + 25), "等冪 ETL 五階段雷射掃描管線", fill=(74, 222, 128), font=F_H2)
         steps = [

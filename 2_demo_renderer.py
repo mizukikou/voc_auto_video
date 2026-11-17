@@ -15,7 +15,6 @@ def draw_cursor_and_click(draw, x, y, is_clicking=False):
         draw.ellipse((x - 12, y - 12, x + 12, y + 12), fill=(244, 63, 94))
     else:
         draw.ellipse((x - 16, y - 16, x + 22, y + 22), outline=(56, 189, 248), width=2)
-
     pointer = [(x, y), (x, y + 38), (x + 11, y + 27), (x + 19, y + 44), (x + 25, y + 41), (x + 17, y + 24), (x + 30, y + 24)]
     draw.polygon(pointer, fill=(255, 255, 255), outline=(14, 165, 233))
 
@@ -24,17 +23,16 @@ def render_demo_frame(scene_type, progress, title):
     draw = ImageDraw.Draw(img)
     draw.rectangle((0, 0, WIDTH, 90), fill=(20, 30, 50))
     scan_x = int((WIDTH - 240) * ((progress * 2.5) % 1.0))
-    draw.rectangle((scan_x, 86, scan_x + 240, 90), fill=(74, 222, 128))
-
+    draw.rectangle((scan_x, HEIGHT - 18, scan_x + 240, HEIGHT - 13), fill=(74, 222, 128))
+    scan_x2 = int(WIDTH - 240 - (WIDTH - 240) * ((progress * 2.5) % 1.0))
+    draw.rectangle((scan_x2, HEIGHT - 10, scan_x2 + 240, HEIGHT - 5), fill=(56, 189, 248))
     tag = "PART 2：GitHub 協作流程" if scene_type.startswith("git_") else "PART 3：網站建置與操作"
     draw.text((50, 22), f"{tag}  |  {title}", fill=(74, 222, 128), font=F_H2)
-
     if scene_type in ["powershell", "git_branch"]:
         draw.rectangle((120, 140, WIDTH - 120, HEIGHT - 80), fill=(10, 14, 23), outline=(56, 189, 248), width=3)
         draw.rectangle((120, 140, WIDTH - 120, 195), fill=(25, 36, 56))
         win_title = "VS Code Terminal - Git Feature Branch Workflow" if scene_type == "git_branch" else "Windows PowerShell - C:\\VOC_Sentry"
         draw.text((150, 152), win_title, fill=(56, 189, 248), font=F_SMALL)
-
         if scene_type == "git_branch":
             commands = [
                 "PS C:\\VOC_Sentry> git checkout main && git pull origin main",
@@ -62,8 +60,7 @@ def render_demo_frame(scene_type, progress, title):
         for idx, line in enumerate(commands[:visible_lines]):
             color = (74, 222, 128) if any(k in line for k in ["[OK]", "[INFO]", "OK", "Switched"]) else ((148, 163, 184) if line.startswith("#") else (248, 250, 252))
             cursor_blink = " _" if (idx == visible_lines - 1 and int(progress * 20) % 2 == 0) else ""
-            use_font = F_SMALL if line.startswith("#") else F_MONO
-            draw.text((160, y), line + cursor_blink, fill=color, font=use_font)
+            draw.text((160, y), line + cursor_blink, fill=color, font=F_SMALL if line.startswith("#") else F_MONO)
             y += 65
         return img
     draw.rectangle((100, 130, WIDTH - 100, HEIGHT - 70), fill=(248, 250, 252), outline=(56, 189, 248), width=3)
@@ -94,11 +91,9 @@ def render_demo_frame(scene_type, progress, title):
         for sl in spec_lines:
             draw.text((200, sy), sl, fill=(51, 65, 85), font=F_BODY)
             sy += 65
-        btn_c = (22, 163, 74) if progress > 0.65 else (34, 197, 94)
-        draw.rectangle((WIDTH - 480, 750, WIDTH - 200, 815), fill=btn_c)
+        draw.rectangle((WIDTH - 480, 750, WIDTH - 200, 815), fill=(22, 163, 74) if progress > 0.65 else (34, 197, 94))
         draw.text((WIDTH - 445, 765), "Submit new issue", fill=(255, 255, 255), font=F_BODY)
         return img
-
     elif scene_type == "git_pr":
         draw.rectangle((100, 200, WIDTH - 100, 270), fill=(36, 41, 47))
         draw.text((140, 218), "GitHub  |  Pull Request #44 : feature/issue-43  ->  main", fill=(248, 250, 252), font=F_BODY)
@@ -114,26 +109,21 @@ def render_demo_frame(scene_type, progress, title):
         for ck in checks:
             draw.text((200, cy), ck, fill=(22, 163, 74), font=F_BODY)
             cy += 65
-        m_color = (126, 34, 206) if progress > 0.7 else (34, 197, 94)
-        m_text = "Merged into main" if progress > 0.75 else "Confirm merge"
-        draw.rectangle((200, 740, 520, 810), fill=m_color)
-        draw.text((245, 757), m_text, fill=(255, 255, 255), font=F_BODY)
+        draw.rectangle((200, 740, 520, 810), fill=(126, 34, 206) if progress > 0.7 else (34, 197, 94))
+        draw.text((245, 757), "Merged into main" if progress > 0.75 else "Confirm merge", fill=(255, 255, 255), font=F_BODY)
         return img
 
     draw.rectangle((100, 200, WIDTH - 100, 270), fill=(15, 23, 42))
     draw.text((140, 218), "VOC_Sentry  |   Dashboard    VOC清單    圖片安全    Admin", fill=(248, 250, 252), font=F_BODY)
-
     if scene_type == "dashboard":
         draw.rectangle((150, 310, 650, 480), fill=(255, 255, 255), outline=(203, 213, 225), width=2)
         draw.text((180, 335), "通過資料驗證筆數 (KPI)", fill=(100, 116, 139), font=F_SMALL)
         draw.text((180, 385), "1,476 筆", fill=(14, 165, 233), font=F_H1)
         draw.rectangle((700, 310, WIDTH - 150, 880), fill=(255, 255, 255), outline=(203, 213, 225), width=2)
         draw.text((740, 335), "評分分布長條圖 (點擊 8.0 分長條下鑽查詢)", fill=(30, 41, 59), font=F_BODY)
-        scores = [("6.0", 120), ("7.0", 210), ("8.0", 380), ("9.0", 420), ("10.0", 340)]
         bx = 780
-        for sc, h in scores:
-            bar_color = (239, 68, 68) if (sc == "8.0" and progress > 0.5) else (56, 189, 248)
-            draw.rectangle((bx, 800 - h, bx + 110, 800), fill=bar_color)
+        for sc, h in [("6.0", 120), ("7.0", 210), ("8.0", 380), ("9.0", 420), ("10.0", 340)]:
+            draw.rectangle((bx, 800 - h, bx + 110, 800), fill=(239, 68, 68) if (sc == "8.0" and progress > 0.5) else (56, 189, 248))
             draw.text((bx + 30, 815), sc, fill=(30, 41, 59), font=F_SMALL)
             bx += 180
     elif scene_type == "login":
@@ -143,36 +133,22 @@ def render_demo_frame(scene_type, progress, title):
         draw.text((730, 465), "analyst_user (群組: VOC_Analyst)", fill=(51, 65, 85), font=F_BODY)
         draw.rectangle((710, 540, 1210, 600), outline=(148, 163, 184), width=2)
         draw.text((730, 555), "••••••••••••••••", fill=(51, 65, 85), font=F_BODY)
-        btn_color = (2, 132, 199) if progress > 0.6 else (14, 165, 233)
-        draw.rectangle((710, 645, 1210, 710), fill=btn_color)
+        draw.rectangle((710, 645, 1210, 710), fill=(2, 132, 199) if progress > 0.6 else (14, 165, 233))
         draw.text((905, 658), "安全登入", fill=(255, 255, 255), font=F_BODY)
     elif scene_type == "voc":
         draw.text((150, 300), "VOC 授權查詢清單 (篩選: score = 8.0 | 隱藏 PK 與 review_id)", fill=(15, 23, 42), font=F_BODY)
         draw.rectangle((150, 360, WIDTH - 150, 420), fill=(226, 232, 240))
         draw.text((180, 375), "評論日期 (UTC)          分數     國家       房型              操作", fill=(30, 41, 59), font=F_BODY)
-        rows = [
-            "2026-10-15T08:20:00Z     8.0      Taiwan     混合宿舍床位      [檢視受限內文]",
-            "2026-10-12T14:05:00Z     8.0      Japan      女性專屬六人房    [檢視受限內文]",
-            "2026-10-09T11:40:00Z     8.0      Korea      雙人標準房        [檢視受限內文]"
-        ]
         ry = 445
-        for r in rows:
+        for r in ["2026-10-15T08:20:00Z     8.0      Taiwan     混合宿舍床位      [檢視受限內文]", "2026-10-12T14:05:00Z     8.0      Japan      女性專屬六人房    [檢視受限內文]", "2026-10-09T11:40:00Z     8.0      Korea      雙人標準房        [檢視受限內文]"]:
             draw.rectangle((150, ry - 10, WIDTH - 150, ry + 55), fill=(255, 255, 255), outline=(226, 232, 240), width=2)
             draw.text((180, ry + 5), r, fill=(51, 65, 85), font=F_BODY)
             ry += 85
     elif scene_type == "token":
         draw.rectangle((360, 310, WIDTH - 360, 880), fill=(255, 255, 255), outline=(239, 68, 68), width=3)
         draw.text((410, 345), "受限欄位安全檢視 (一次性拋棄式權杖驗證通過)", fill=(185, 28, 28), font=F_H2)
-        info = [
-            "- 權杖驗證：CSPRNG Token 核銷成功 (LocMemCache 單次原子消耗)",
-            "- 隱式原因碼：後端依群組自動推導為 SUPPORT_CASE (禁止前端傳入)",
-            "- 強制審計：已寫入 VOCRestrictedAuditLog [ALLOW] (保留90天)",
-            "------------------------------------------------------------------",
-            "- 評論者 (PII)：王*明 (已通過雙權限授權顯示)",
-            "- 評論原文：地點離捷運東門站非常近，公共空間乾淨且服務人員親切！"
-        ]
         iy = 430
-        for line in info:
+        for line in ["- 權杖驗證：CSPRNG Token 核銷成功 (LocMemCache 單次原子消耗)", "- 隱式原因碼：後端依群組自動推導為 SUPPORT_CASE (禁止前端傳入)", "- 強制審計：已寫入 VOCRestrictedAuditLog [ALLOW] (保留90天)", "------------------------------------------------------------------", "- 評論者 (PII)：王*明 (已通過雙權限授權顯示)", "- 評論原文：地點離捷運東門站非常近，公共空間乾淨且服務人員親切！"]:
             draw.text((410, iy), line, fill=(30, 41, 59), font=F_BODY)
             iy += 65
     return img
