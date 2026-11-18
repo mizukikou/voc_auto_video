@@ -51,6 +51,7 @@ def render_demo_frame(scene_type, progress, title, d_ratios=None):
         btn_col = (46, 160, 67) if progress > 0.78 else (35, 134, 54)
         draw.rectangle((WIDTH - 450, 765, WIDTH - 180, 830), fill=btn_col)
         draw.text((WIDTH - 415, 782), "Submit new issue", fill=(255, 255, 255), font=F_BODY)
+
     elif scene_type == "git_branch":
         draw.rectangle((120, 130, WIDTH - 120, 910), fill=(12, 16, 26), outline=(56, 189, 248), width=2)
         draw.rectangle((120, 130, WIDTH - 120, 185), fill=(30, 41, 59))
@@ -83,7 +84,6 @@ def render_demo_frame(scene_type, progress, title, d_ratios=None):
                     col = (226, 232, 240)
                 draw.text((155, ty), line, fill=col, font=F_MONO)
                 ty += 50
-
     elif scene_type == "git_pr":
         draw.rectangle((140, 130, WIDTH - 140, 910), fill=(13, 17, 23), outline=(48, 54, 61), width=2)
         draw.text((180, 165), "Pull Request #44: feature/issue-43 -> main", fill=(240, 246, 252), font=F_H2)
@@ -105,6 +105,7 @@ def render_demo_frame(scene_type, progress, title, d_ratios=None):
         if vis_c >= 4:
             draw.rectangle((180, 740, 540, 810), fill=(46, 160, 67))
             draw.text((235, 758), "Confirm merge", fill=(255, 255, 255), font=F_BODY)
+
     elif scene_type == "powershell":
         draw.rectangle((120, 130, WIDTH - 120, 910), fill=(1, 36, 86), outline=(56, 189, 248), width=3)
         draw.rectangle((120, 130, WIDTH - 120, 185), fill=(15, 23, 42))
@@ -131,7 +132,7 @@ def render_demo_frame(scene_type, progress, title, d_ratios=None):
     elif scene_type == "dashboard":
         draw.rectangle((100, 120, WIDTH - 100, 920), fill=(248, 250, 252), outline=(148, 163, 184), width=2)
         draw.rectangle((100, 120, WIDTH - 100, 185), fill=(30, 41, 59))
-        draw.text((140, 138), "http://127.0.0  -  VOC_Sentry 旅宿顧客評論分析儀表板 (訪客公開視圖)", fill=(248, 250, 252), font=F_SMALL)
+        draw.text((140, 138), "http://127.0.0.1:8000  -  VOC_Sentry 旅宿顧客評論分析儀表板 (訪客公開視圖)", fill=(248, 250, 252), font=F_SMALL)
         draw.rectangle((150, 225, 580, 410), fill=(255, 255, 255), outline=(203, 213, 225), width=2)
         draw.text((180, 250), "通過驗證評論總數 (Verified)", fill=(100, 116, 139), font=F_SMALL)
         draw.text((180, 305), "1,476 筆", fill=(14, 165, 233), font=F_H1)
@@ -147,6 +148,7 @@ def render_demo_frame(scene_type, progress, title, d_ratios=None):
             draw.rectangle((bx, 780 - h, bx + 95, 780), fill=col)
             draw.text((bx + 20, 795), sc, fill=(51, 65, 85), font=F_SMALL)
             bx += 140
+
     elif scene_type == "login":
         draw.rectangle((100, 120, WIDTH - 100, 920), fill=(241, 245, 249))
         draw.rectangle((620, 240, 1300, 780), fill=(255, 255, 255), outline=(203, 213, 225), width=2)

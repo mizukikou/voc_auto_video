@@ -46,6 +46,7 @@ def interp_mouse(path, prog):
     st = lt * lt * (3 - 2 * lt)
     p1, p2 = path.__getitem__(idx), path.__getitem__(idx + 1)
     return int(p1.__getitem__(0) + (p2.__getitem__(0) - p1.__getitem__(0)) * st), int(p1.__getitem__(1) + (p2.__getitem__(1) - p1.__getitem__(1)) * st)
+
 def fmt_ass(sec):
     h = int(sec // 3600)
     m = int((sec % 3600) // 60)
@@ -79,7 +80,6 @@ def split_sub_clauses(sentence):
     if buf.strip():
         lines.append(buf.strip())
     return lines
-
 async def build_chapter_audio_and_subs(cid, script, audio_dir, events, tl):
     sents = split_sentences(script)
     sent_clips, sent_timings = [], []
@@ -93,7 +93,6 @@ async def build_chapter_audio_and_subs(cid, script, audio_dir, events, tl):
         sent_clips.append(ac)
         sent_timings.append((sent, local_t, local_t + sdur))
 
-        # 單句內部再按逗號切分短字幕，單句僅 3~6 秒，誤差趨近於 0
         clauses = split_sub_clauses(sent)
         tot_c = max(1, sum(len(c) for c in clauses))
         ct = tl + local_t
@@ -117,6 +116,7 @@ def calc_sent_ratios(sent_timings, keywords, total_dur):
                 break
         res.append(found if found is not None else (res.__getitem__(-1) if res else 0.0))
     return res
+
 async def main():
     out = "output_visual_20min"
     os.makedirs(f"{out}/audio", exist_ok=True)
@@ -150,7 +150,7 @@ async def main():
     for sc in data.DEMO_SCENES:
         sid = sc["id"]
         cp = f"{out}/clips/clip_{sid:02d}.mp4"
-        full_ac, s_clips, speech_dur, _ = await build_chapter_audio_and_subs(sid, sc["script"], f"{out}/audio", events, tl)
+        full_ac, s_clips, speech_dur, stimes = await build_chapter_audio_and_subs(sid, sc["script"], f"{out}/audio", events, tl)
         dur = speech_dur + 2.0
         tl += dur
         clip_files.append(cp)
@@ -160,11 +160,15 @@ async def main():
                 c.close()
             continue
         ar = speech_dur / dur
-        c_times = [ct * ar for ct in sc["click_times"]]
-        def mk_demo(t, s=sc, d=dur, cts=c_times, audio_r=ar):
+        d_tr = calc_sent_ratios(stimes, sc.get("triggers", []), speech_dur)
+        if "click_triggers" in sc:
+            c_times = calc_sent_ratios(stimes, sc["click_triggers"], dur)
+        else:
+            c_times = [ct * ar for ct in sc["click_times"]]
+        def mk_demo(t, s=sc, d=dur, cts=c_times, audio_r=ar, dt=d_tr):
             p = min(1.0, max(0.0, t / d))
             p_speech = min(1.0, p / max(0.1, audio_r))
-            img = demo.render_demo_frame(s["scene_type"], p_speech, s["title"])
+            img = demo.render_demo_frame(s["scene_type"], p_speech, s["title"], d_ratios=dt)
             mx, my = interp_mouse(s["mouse_path"], p_speech)
             demo.draw_cursor_and_click(ImageDraw.Draw(img), mx, my, any(abs(p - ct) < 0.035 for ct in cts))
             return np.array(img)
